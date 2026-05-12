@@ -1,0 +1,1690 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PolicySphere | Public Policy Discussion Platform</title>
+    <style>
+      :root {
+        --bg: #080b14;
+        --surface: rgba(24, 29, 53, 0.65);
+        --surface-strong: rgba(255, 255, 255, 0.07);
+        --surface-border: rgba(255, 255, 255, 0.12);
+        --text: #eef2ff;
+        --text-muted: #bec4dc;
+        --primary: #6c5ce7;
+        --primary-soft: #8c7bff;
+        --accent: #18d6ff;
+        --accent-2: #62ffce;
+        --shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+        --radius: 28px;
+        scroll-behavior: smooth;
+      }
+
+      .light-theme {
+        --bg: #f3f5ff;
+        --surface: rgba(255, 255, 255, 0.82);
+        --surface-strong: rgba(255, 255, 255, 0.95);
+        --surface-border: rgba(13, 28, 66, 0.08);
+        --text: #121a34;
+        --text-muted: #5d6a8d;
+        --primary: #4b6bff;
+        --primary-soft: #5977ff;
+        --accent: #00c8ff;
+        --accent-2: #17e6ae;
+        --shadow: 0 24px 48px rgba(15, 23, 42, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        min-height: 100vh;
+        font-family:
+          Inter,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(88, 118, 255, 0.24),
+            transparent 24%
+          ),
+          radial-gradient(
+            circle at bottom right,
+            rgba(24, 214, 255, 0.16),
+            transparent 20%
+          ),
+          linear-gradient(180deg, #070a14 0%, #11182c 45%, #0d1030 100%);
+        color: var(--text);
+        overflow-x: hidden;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            circle at 20% 20%,
+            rgba(108, 92, 255, 0.14),
+            transparent 14%
+          ),
+          radial-gradient(
+            circle at 85% 30%,
+            rgba(24, 214, 255, 0.12),
+            transparent 12%
+          );
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .loading-screen {
+        position: fixed;
+        inset: 0;
+        background: var(--bg);
+        display: grid;
+        place-items: center;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 0.6s ease;
+      }
+
+      .loading-screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .loader {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 6px solid rgba(255, 255, 255, 0.15);
+        border-top-color: var(--primary);
+        animation: spin 1.25s linear infinite;
+        position: relative;
+      }
+
+      .loader::after {
+        content: "";
+        position: absolute;
+        inset: 18px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .container {
+        width: min(1200px, calc(100% - 2rem));
+        margin: 0 auto;
+        padding-top: 1.5rem;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.2rem 0;
+        position: relative;
+        z-index: 2;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        font-size: 1.05rem;
+      }
+
+      .brand::before {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        box-shadow: 0 0 24px rgba(108, 92, 255, 0.35);
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 1.7rem;
+        list-style: none;
+        font-size: 0.96rem;
+      }
+
+      .nav-links a {
+        color: var(--text-muted);
+        text-decoration: none;
+        transition:
+          color 0.25s ease,
+          transform 0.25s ease;
+      }
+
+      .nav-links a:hover,
+      .nav-links a.active {
+        color: var(--text);
+        transform: translateY(-1px);
+      }
+
+      .action-group {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+      }
+
+      .btn,
+      .pill {
+        border: none;
+        cursor: pointer;
+        border-radius: 999px;
+        padding: 0.9rem 1.35rem;
+        font-weight: 600;
+        transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease,
+          background 0.25s ease;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: #fff;
+        box-shadow: 0 18px 30px rgba(108, 92, 255, 0.21);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .btn:hover,
+      .pill:hover {
+        transform: translateY(-1px);
+      }
+
+      .theme-toggle {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .mobile-toggle {
+        display: none;
+        width: 46px;
+        height: 46px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        cursor: pointer;
+        color: var(--text);
+        position: relative;
+      }
+
+      .mobile-toggle span,
+      .mobile-toggle span::before,
+      .mobile-toggle span::after {
+        display: block;
+        width: 20px;
+        height: 2px;
+        background: currentColor;
+        border-radius: 999px;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .mobile-toggle span {
+        top: 50%;
+      }
+      .mobile-toggle span::before {
+        content: "";
+        top: -7px;
+      }
+      .mobile-toggle span::after {
+        content: "";
+        top: 7px;
+      }
+
+      header {
+        position: relative;
+        overflow: hidden;
+        padding-bottom: 4rem;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2.5rem;
+        align-items: center;
+        min-height: calc(100vh - 4.5rem);
+        padding: 2rem 0 4rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-copy {
+        max-width: 580px;
+        animation: fadeUp 1.1s ease both;
+      }
+
+      .hero-copy h1 {
+        font-size: clamp(3rem, 5vw, 4.4rem);
+        line-height: 1.03;
+        letter-spacing: -0.05em;
+        margin-bottom: 1rem;
+        background: linear-gradient(90deg, #ffffff, rgba(255, 255, 255, 0.85));
+        -webkit-background-clip: text;
+        color: transparent;
+      }
+
+      .hero-copy p {
+        font-size: 1.05rem;
+        color: var(--text-muted);
+        line-height: 1.85;
+        margin-bottom: 2rem;
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .hero-visual {
+        position: relative;
+        display: grid;
+        place-items: center;
+        min-height: 520px;
+        animation: float 8s ease-in-out infinite;
+      }
+
+      .hero-card {
+        width: 100%;
+        max-width: 520px;
+        padding: 2rem;
+        border-radius: 36px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(24px);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .hero-card::before,
+      .hero-card::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(32px);
+        opacity: 0.9;
+      }
+
+      .hero-card::before {
+        width: 220px;
+        height: 220px;
+        background: rgba(108, 92, 255, 0.24);
+        top: -40px;
+        left: -40px;
+      }
+
+      .hero-card::after {
+        width: 180px;
+        height: 180px;
+        background: rgba(24, 214, 255, 0.16);
+        bottom: -50px;
+        right: -40px;
+      }
+
+      .hero-card header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.6rem;
+        gap: 1rem;
+      }
+
+      .hero-card header span {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .hero-card strong {
+        font-size: 1.35rem;
+        display: block;
+        line-height: 1.2;
+      }
+
+      .hero-card .stat-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+      }
+
+      .stat-pill {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 1rem;
+        border-radius: 22px;
+        display: grid;
+        gap: 0.3rem;
+      }
+
+      .stat-pill span {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      .stat-pill strong {
+        font-size: 1.2rem;
+      }
+
+      section {
+        padding: 4rem 0;
+        position: relative;
+        z-index: 1;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: baseline;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .section-title h2 {
+        font-size: 2rem;
+        letter-spacing: -0.04em;
+      }
+
+      .section-title p {
+        color: var(--text-muted);
+        flex: 1;
+        line-height: 1.7;
+      }
+
+      .grid-3 {
+        display: grid;
+        gap: 1.7rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .grid-2 {
+        display: grid;
+        gap: 1.7rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .motion-card,
+      .event-card,
+      .leader-card,
+      .stats-card,
+      .discussion-card,
+      .poll-card {
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: var(--radius);
+        padding: 1.6rem;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(18px);
+        position: relative;
+        overflow: hidden;
+        transition:
+          transform 0.35s ease,
+          border-color 0.35s ease,
+          box-shadow 0.35s ease;
+      }
+
+      .motion-card:hover,
+      .event-card:hover,
+      .leader-card:hover,
+      .stats-card:hover,
+      .discussion-card:hover,
+      .poll-card:hover {
+        transform: translateY(-8px);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 28px 60px rgba(0, 0, 0, 0.2);
+      }
+
+      .motion-card .tag-row,
+      .event-card .tag-row,
+      .leader-card .rank-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .tag,
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.6rem 0.85rem;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .status-trending {
+        color: #ffe066;
+      }
+      .status-live {
+        color: #7ef7d4;
+      }
+      .status-closed {
+        color: #ff7bb3;
+      }
+
+      .motion-card h3,
+      .event-card h3,
+      .leader-card h3 {
+        font-size: 1.15rem;
+        margin-bottom: 1rem;
+        line-height: 1.35;
+      }
+
+      .motion-card p,
+      .event-card p,
+      .leader-card p,
+      .stats-card p {
+        color: var(--text-muted);
+        line-height: 1.75;
+        margin-bottom: 1rem;
+      }
+
+      .motion-card .vote-row,
+      .event-card .event-meta,
+      .poll-card .poll-actions,
+      .discussion-card .discussion-footer,
+      .leader-card .profile-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .motion-card .vote-count,
+      .leader-card .points {
+        font-size: 1.15rem;
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .motion-card .motion-actions,
+      .event-card .register-btn,
+      .poll-card .button-group,
+      .discussion-card .post-tools {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .pill-soft {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+
+      .motion-card button,
+      .event-card button,
+      .poll-card button,
+      .discussion-card button {
+        min-width: 110px;
+      }
+
+      .motion-card button:hover,
+      .event-card button:hover,
+      .poll-card button:hover,
+      .discussion-card button:hover {
+        box-shadow: 0 20px 30px rgba(0, 0, 0, 0.15);
+      }
+
+      .motion-card .motion-actions .btn-primary,
+      .event-card .register-btn .btn-primary,
+      .poll-card .poll-actions .btn-primary {
+        min-width: 110px;
+      }
+
+      .motion-card .motion-actions .btn-secondary,
+      .poll-card .poll-actions .btn-secondary {
+        min-width: 110px;
+      }
+
+      .motion-card .vote-count {
+        color: var(--accent-2);
+      }
+
+      .live-feed {
+        display: grid;
+        grid-template-columns: 1.4fr 0.9fr;
+        gap: 1.7rem;
+      }
+
+      .feed-panel {
+        display: grid;
+        gap: 1.4rem;
+      }
+
+      .Discussion-form {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .Discussion-form textarea,
+      .Discussion-form input {
+        width: 100%;
+        padding: 1rem 1rem;
+        border-radius: 22px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        outline: none;
+        resize: vertical;
+        min-height: 120px;
+        font-size: 1rem;
+        transition: border 0.2s ease;
+      }
+
+      .Discussion-form textarea:focus,
+      .Discussion-form input:focus {
+        border-color: var(--primary);
+      }
+
+      .discussion-card {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .discussion-card .discussion-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .discussion-card .user-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        color: #fff;
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+
+      .discussion-card small {
+        color: var(--text-muted);
+      }
+
+      .discussion-card .content {
+        color: var(--text);
+        line-height: 1.75;
+      }
+
+      .discussion-card .post-tools {
+        justify-content: flex-start;
+        gap: 0.8rem;
+      }
+
+      .discussion-card .post-tools button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--text);
+        padding: 0.75rem 1rem;
+        border-radius: 999px;
+        font-size: 0.95rem;
+      }
+
+      .discussion-card .post-tools button svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      .poll-card {
+        display: grid;
+        gap: 1.4rem;
+      }
+
+      .poll-card strong {
+        font-size: 1.1rem;
+        display: block;
+        margin-bottom: 0.35rem;
+      }
+
+      .poll-card .poll-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
+      }
+
+      .progress-bar {
+        height: 16px;
+        width: 100%;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        margin-bottom: 0.75rem;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        transition: width 0.5s ease;
+      }
+
+      .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+
+      .event-card .event-meta {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .event-card .event-meta span {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+      }
+
+      .leader-card {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .leader-card .profile-row {
+        align-items: center;
+      }
+
+      .leader-card .avatar-sm {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        margin-right: 1rem;
+      }
+
+      .leader-card .profile-meta {
+        display: grid;
+        gap: 0.2rem;
+      }
+
+      .leader-card .profile-meta span {
+        font-size: 0.92rem;
+        color: var(--text-muted);
+      }
+
+      .rank-badge {
+        padding: 0.55rem 0.9rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        font-size: 0.86rem;
+        color: var(--text);
+      }
+
+      .stats-grid {
+        display: grid;
+        gap: 1.3rem;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .stats-card {
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      .stats-card strong {
+        font-size: 2rem;
+        color: var(--accent);
+      }
+
+      footer {
+        padding: 2.5rem 0 4rem;
+      }
+
+      .footer-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr 1fr;
+        gap: 1.8rem;
+      }
+
+      .footer-brand strong {
+        font-size: 1.35rem;
+        display: block;
+        margin-bottom: 1rem;
+      }
+
+      .footer-links,
+      .footer-social {
+        display: grid;
+        gap: 0.85rem;
+      }
+
+      .footer-links a,
+      .footer-social a {
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.95rem;
+      }
+
+      .footer-social a:hover,
+      .footer-links a:hover {
+        color: var(--text);
+      }
+
+      .footer-bottom {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        color: var(--text-muted);
+        font-size: 0.92rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 1.4rem;
+      }
+
+      .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(56px);
+        opacity: 0.65;
+        z-index: 0;
+        animation: float 12s ease-in-out infinite;
+      }
+
+      .blob.one {
+        width: 240px;
+        height: 240px;
+        top: 12%;
+        left: -8%;
+        background: rgba(108, 92, 255, 0.22);
+      }
+
+      .blob.two {
+        width: 320px;
+        height: 320px;
+        right: -10%;
+        bottom: 5%;
+        background: rgba(24, 214, 255, 0.2);
+        animation-delay: 2s;
+      }
+
+      .blob.three {
+        width: 180px;
+        height: 180px;
+        top: 35%;
+        right: 18%;
+        background: rgba(255, 125, 179, 0.14);
+        animation-delay: 4s;
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(32px);
+        transition:
+          opacity 0.85s ease,
+          transform 0.85s ease;
+      }
+
+      .reveal.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .scroll-cue {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 1rem;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        opacity: 0.9;
+        animation: pulse 2.2s ease infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          transform: translate(-50%, 0);
+          opacity: 0.9;
+        }
+        50% {
+          transform: translate(-50%, 6px);
+          opacity: 0.5;
+        }
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-12px);
+        }
+      }
+
+      .mobile-menu {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 11, 20, 0.95);
+        backdrop-filter: blur(24px);
+        padding: 4rem 1.5rem 1.5rem;
+        z-index: 999;
+        flex-direction: column;
+        gap: 2rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+
+      .mobile-menu.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .mobile-menu .nav-links {
+        flex-direction: column;
+        gap: 1.4rem;
+      }
+
+      .mobile-menu .close-menu {
+        position: absolute;
+        top: 1.6rem;
+        right: 1.6rem;
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        color: var(--text);
+      }
+
+      .hero-visual img {
+        max-width: 100%;
+        display: block;
+      }
+
+      .discussion-list {
+        display: grid;
+        gap: 1.2rem;
+      }
+
+      .discussion-list .discussion-card {
+        padding: 1.35rem;
+      }
+
+      .footer-grid a,
+      .footer-grid span {
+        color: var(--text-muted);
+      }
+
+      .footer-grid .footer-social {
+        flex-direction: row;
+        align-items: center;
+      }
+
+      .footer-social a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .footer-social a svg {
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+
+      .scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(108, 92, 255, 0.85) rgba(255, 255, 255, 0.08);
+      }
+
+      body::-webkit-scrollbar {
+        width: 12px;
+      }
+
+      body::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      body::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, var(--primary), var(--accent));
+        border-radius: 999px;
+      }
+
+      @media (max-width: 1024px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+        .live-feed {
+          grid-template-columns: 1fr;
+        }
+        .footer-grid {
+          grid-template-columns: 1fr;
+        }
+        .stats-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .grid-3 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .hero-card {
+          max-width: 100%;
+        }
+      }
+
+      @media (max-width: 820px) {
+        nav {
+          display: none;
+        }
+        .mobile-toggle {
+          display: grid;
+          place-items: center;
+        }
+        .action-group {
+          display: none;
+        }
+        .container {
+          width: min(100%, calc(100% - 1.5rem));
+        }
+        section {
+          padding: 3rem 0;
+        }
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .brand {
+          font-size: 0.95rem;
+        }
+        .hero-copy h1 {
+          font-size: 2.6rem;
+        }
+        .hero-copy p {
+          font-size: 1rem;
+        }
+        .hero-actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .motion-card .motion-actions,
+        .poll-card .poll-actions,
+        .event-card .event-meta {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .event-card .event-meta span {
+          width: 100%;
+        }
+        .leader-card .profile-row {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .footer-bottom {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body class="scrollbar">
+    <div class="loading-screen" id="loadingScreen">
+      <div class="loader"></div>
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu">
+      <button class="close-menu" id="closeMenu">×</button>
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#motions">Discussions</a></li>
+        <li><a href="#polls">Motions</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#leaderboard">Members</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+
+    <header id="home">
+      <div class="blob one"></div>
+      <div class="blob two"></div>
+      <div class="blob three"></div>
+
+      <div class="container">
+        <div class="topbar">
+          <a class="brand" href="#home">PolicySphere</a>
+          <nav>
+            <ul class="nav-links">
+              <li><a class="active" href="#home">Home</a></li>
+              <li><a href="#motions">Discussions</a></li>
+              <li><a href="#polls">Motions</a></li>
+              <li><a href="#events">Events</a></li>
+              <li><a href="#leaderboard">Members</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </nav>
+          <div class="action-group">
+            <button
+              class="theme-toggle"
+              id="themeToggle"
+              aria-label="Toggle theme"
+            >
+              ☀️
+            </button>
+          </div>
+          <button
+            class="mobile-toggle"
+            id="mobileToggle"
+            aria-label="Open mobile menu"
+          >
+            <span></span>
+          </button>
+        </div>
+
+        <div class="hero">
+          <div class="hero-copy reveal">
+            <h1>Discuss. Debate. Shape Policy.</h1>
+            <p>
+              Unite citizens, policymakers, and experts in a modern discussion
+              platform built for thoughtful public policy debate and
+              collaborative decision-making.
+            </p>
+            <div class="hero-actions">
+              <button class="btn btn-primary">Join Discussion</button>
+              <button class="btn btn-secondary">Explore Motions</button>
+            </div>
+          </div>
+
+          <div class="hero-visual reveal">
+            <div class="hero-card">
+              <header>
+                <span>Live debate</span>
+                <span>Upcoming session</span>
+              </header>
+              <strong
+                >City council votes on sustainable transport strategy.</strong
+              >
+              <div class="stat-row">
+                <div class="stat-pill">
+                  <span>Participants</span>
+                  <strong>1.4k</strong>
+                </div>
+                <div class="stat-pill">
+                  <span>Votes cast</span>
+                  <strong>842</strong>
+                </div>
+              </div>
+              <div class="stat-row">
+                <div class="stat-pill">
+                  <span>Avg response</span>
+                  <strong>4m</strong>
+                </div>
+                <div class="stat-pill">
+                  <span>Top issue</span>
+                  <strong>Public Transit</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="motions" class="reveal">
+        <div class="section-title">
+          <h2>Featured Debate Motions</h2>
+          <p>
+            Explore active motions shaping public policy conversation across
+            education, defence, economy, and urban planning.
+          </p>
+        </div>
+        <div class="grid-3" id="motionsGrid"></div>
+      </section>
+
+      <section class="reveal">
+        <div class="section-title">
+          <h2>Live Discussion Feed</h2>
+          <p>
+            Post comments, react to community voices, and participate in ongoing
+            policy conversations with real-time interaction.
+          </p>
+        </div>
+        <div class="live-feed">
+          <div class="feed-panel reveal">
+            <div class="Discussion-form">
+              <input type="text" id="commentAuthor" placeholder="Your name" />
+              <textarea
+                id="commentText"
+                placeholder="What are your thoughts on today’s motion?"
+              ></textarea>
+              <button class="btn btn-primary" id="postCommentBtn">
+                Post Comment
+              </button>
+            </div>
+            <div class="discussion-list" id="discussionList"></div>
+          </div>
+          <div class="poll-card reveal" id="polls">
+            <strong
+              >Motion: India should prioritize urban public transport over
+              highways.</strong
+            >
+            <p>
+              Vote now and see how the community weighs in on sustainable
+              infrastructure priorities.
+            </p>
+            <div class="button-group poll-actions">
+              <button class="btn btn-primary" id="agreeBtn">Agree</button>
+              <button class="btn btn-secondary" id="disagreeBtn">
+                Disagree
+              </button>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="agreeFill"></div>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="disagreeFill"></div>
+            </div>
+            <div class="progress-labels">
+              <span>Agree: <strong id="agreePercent">0%</strong></span>
+              <span>Disagree: <strong id="disagreePercent">0%</strong></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="events" class="reveal">
+        <div class="section-title">
+          <h2>Upcoming Events</h2>
+          <p>
+            Join debates, public forums, and expert-led roundtables that
+            influence real policy decisions.
+          </p>
+        </div>
+        <div class="grid-3" id="eventsGrid"></div>
+      </section>
+
+      <section id="leaderboard" class="reveal">
+        <div class="section-title">
+          <h2>Top Contributors</h2>
+          <p>
+            Recognizing the voices driving constructive discussion and
+            meaningful policy proposals.
+          </p>
+        </div>
+        <div class="grid-3" id="leaderGrid"></div>
+      </section>
+
+      <section class="reveal">
+        <div class="section-title">
+          <h2>Platform Impact</h2>
+          <p>
+            Track the momentum of our community through interactive metrics and
+            continuously growing engagement.
+          </p>
+        </div>
+        <div class="stats-grid" id="statsGrid"></div>
+      </section>
+    </main>
+
+    <footer class="container reveal" id="contact">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <strong>PolicySphere</strong>
+          <p>
+            Designing civic engagement with clarity, care, and policy impact at
+            the center of every discussion.
+          </p>
+        </div>
+        <div class="footer-links">
+          <a href="#home">Home</a>
+          <a href="#motions">Discussions</a>
+          <a href="#events">Events</a>
+          <a href="#leaderboard">Members</a>
+        </div>
+        <div class="footer-social">
+          <a href="#" aria-label="Twitter"
+            ><svg viewBox="0 0 24 24">
+              <path
+                d="M22 5.9a8.3 8.3 0 0 1-2.4.7 4.2 4.2 0 0 0 1.8-2.3 8.5 8.5 0 0 1-2.7 1 4.2 4.2 0 0 0-7.1 3.8 11.8 11.8 0 0 1-8.6-4.4 4.2 4.2 0 0 0 1.3 5.5 4 4 0 0 1-1.9-.5v.05a4.2 4.2 0 0 0 3.4 4.1 4.1 4.1 0 0 1-1.9.1 4.2 4.2 0 0 0 3.9 2.9 8.5 8.5 0 0 1-5.3 1.8A8.7 8.7 0 0 1 2 19.4a12 12 12 0 0 0 6.5 1.9c7.8 0 12.1-6.4 12.1-12V7A8.5 8.5 0 0 0 22 5.9z"
+              /></svg
+          ></a>
+          <a href="#" aria-label="LinkedIn"
+            ><svg viewBox="0 0 24 24">
+              <path
+                d="M4.98 3.5a2.31 2.31 0 1 0 0 4.62 2.31 2.31 0 0 0 0-4.62zM3 8.75h4v12h-4v-12zm7.5 0h3.85v1.67h.05c.54-1.02 1.88-2.1 3.87-2.1 4.13 0 4.9 2.72 4.9 6.25v7.98h-4v-7.1c0-1.7-.03-3.88-2.37-3.88-2.37 0-2.73 1.85-2.73 3.76v7.22h-4v-12z"
+              /></svg
+          ></a>
+          <a href="#" aria-label="Facebook"
+            ><svg viewBox="0 0 24 24">
+              <path
+                d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.99 3.66 9.12 8.44 9.88v-7h-2.54V12h2.54V9.8c0-2.5 1.49-3.88 3.77-3.88 1.09 0 2.24.2 2.24.2v2.45h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.88h-2.34v7C18.34 21.12 22 16.99 22 12z"
+              /></svg
+          ></a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 PolicySphere. Built for civic engagement.</span>
+        <span
+          >Designed with glassmorphism, motion, and responsive
+          interaction.</span
+        >
+      </div>
+    </footer>
+
+    <script>
+      // Page data and dynamic rendering
+      const motions = [
+        {
+          title: "This House believes AI regulation should be stricter.",
+          category: "Technology",
+          status: "Trending",
+          votes: 1284,
+          badge: "status-trending",
+        },
+        {
+          title: "Women’s political reservation does more harm than good.",
+          category: "Equality",
+          status: "Live",
+          votes: 942,
+          badge: "status-live",
+        },
+        {
+          title:
+            "India should prioritize urban public transport over highways.",
+          category: "Urbanization",
+          status: "Closed",
+          votes: 1765,
+          badge: "status-closed",
+        },
+      ];
+
+      const events = [
+        {
+          title: "City Budget Roundtable",
+          date: "May 25, 2026",
+          venue: "Civic Hall, Delhi",
+        },
+        {
+          title: "National Transport Forum",
+          date: "June 5, 2026",
+          venue: "Virtual Summit",
+        },
+        {
+          title: "Education Policy Lab",
+          date: "June 18, 2026",
+          venue: "Bangalore Conference Center",
+        },
+      ];
+
+      const leaders = [
+        { name: "Aarav Mehta", initials: "AM", points: 1930, rank: "Gold" },
+        { name: "Nisha Kapoor", initials: "NK", points: 1680, rank: "Silver" },
+        { name: "Riya Sharma", initials: "RS", points: 1450, rank: "Bronze" },
+      ];
+
+      const stats = [
+        { label: "Total Members", value: 12480 },
+        { label: "Active Debates", value: 72 },
+        { label: "Policies Discussed", value: 316 },
+        { label: "Events Conducted", value: 48 },
+      ];
+
+      const discussionFeed = [
+        {
+          author: "Sofia",
+          text: "Stricter AI regulation can protect civil liberties while encouraging innovation.",
+          likes: 12,
+          time: "5 mins ago",
+        },
+        {
+          author: "Rohan",
+          text: "We need more funding for public transport to make it accessible in smaller cities.",
+          likes: 8,
+          time: "12 mins ago",
+        },
+        {
+          author: "Meera",
+          text: "Reservation policies should focus on equal opportunity, not just quota numbers.",
+          likes: 5,
+          time: "28 mins ago",
+        },
+      ];
+
+      let agreeVotes = 72;
+      let disagreeVotes = 45;
+      const totalVotes = () => agreeVotes + disagreeVotes;
+
+      const motionsGrid = document.getElementById("motionsGrid");
+      const eventsGrid = document.getElementById("eventsGrid");
+      const leaderGrid = document.getElementById("leaderGrid");
+      const statsGrid = document.getElementById("statsGrid");
+      const discussionList = document.getElementById("discussionList");
+      const agreeFill = document.getElementById("agreeFill");
+      const disagreeFill = document.getElementById("disagreeFill");
+      const agreePercent = document.getElementById("agreePercent");
+      const disagreePercent = document.getElementById("disagreePercent");
+      const postCommentBtn = document.getElementById("postCommentBtn");
+      const commentText = document.getElementById("commentText");
+      const commentAuthor = document.getElementById("commentAuthor");
+
+      function renderMotions() {
+        motionsGrid.innerHTML = motions
+          .map(
+            (motion) => `
+        <article class="motion-card reveal">
+          <div class="tag-row">
+            <span class="tag">${motion.category}</span>
+            <span class="status-badge ${motion.badge}">${motion.status}</span>
+          </div>
+          <h3>${motion.title}</h3>
+          <p>Engage with the debate, read opinions, and weigh your perspective for the community.</p>
+          <div class="vote-row">
+            <span class="vote-count">${motion.votes} votes</span>
+            <div class="motion-actions">
+              <button class="btn btn-primary">Vote</button>
+              <button class="btn btn-secondary">View Discussion</button>
+            </div>
+          </div>
+        </article>
+      `,
+          )
+          .join("");
+      }
+
+      function renderEvents() {
+        eventsGrid.innerHTML = events
+          .map(
+            (event) => `
+        <article class="event-card reveal">
+          <div class="tag-row">
+            <span class="tag">Event</span>
+            <span class="status-badge status-live">Register</span>
+          </div>
+          <h3>${event.title}</h3>
+          <div class="event-meta">
+            <span><strong>Date:</strong> ${event.date}</span>
+            <span><strong>Venue:</strong> ${event.venue}</span>
+          </div>
+          <button class="btn btn-primary register-btn">Register</button>
+        </article>
+      `,
+          )
+          .join("");
+      }
+
+      function renderLeaders() {
+        leaderGrid.innerHTML = leaders
+          .map(
+            (leader) => `
+        <article class="leader-card reveal">
+          <div class="profile-row">
+            <div class="avatar-sm">${leader.initials}</div>
+            <div class="profile-meta">
+              <h3>${leader.name}</h3>
+              <span>${leader.points} points</span>
+            </div>
+          </div>
+          <span class="rank-badge">${leader.rank}</span>
+        </article>
+      `,
+          )
+          .join("");
+      }
+
+      function renderStats() {
+        statsGrid.innerHTML = stats
+          .map(
+            (stat) => `
+        <article class="stats-card reveal">
+          <span>${stat.label}</span>
+          <strong data-value="${stat.value}">0</strong>
+          <p>Continuously growing participation fuels stronger policy outcomes.</p>
+        </article>
+      `,
+          )
+          .join("");
+      }
+
+      function renderDiscussion() {
+        discussionList.innerHTML = discussionFeed
+          .map(
+            (post, index) => `
+        <article class="discussion-card reveal" data-index="${index}">
+          <div class="discussion-header">
+            <div class="user-chip">
+              <span class="avatar">${post.author.charAt(0)}</span>
+              <div>
+                <strong>${post.author}</strong>
+                <small>${post.time}</small>
+              </div>
+            </div>
+            <span>${post.likes} likes</span>
+          </div>
+          <p class="content">${post.text}</p>
+          <div class="post-tools">
+            <button data-action="like" data-index="${index}">👍 Like</button>
+            <button data-action="delete" data-index="${index}">🗑️ Delete</button>
+          </div>
+        </article>
+      `,
+          )
+          .join("");
+      }
+
+      function updatePollUI() {
+        const total = totalVotes();
+        const agreeValue = total ? Math.round((agreeVotes / total) * 100) : 0;
+        const disagreeValue = total
+          ? Math.round((disagreeVotes / total) * 100)
+          : 0;
+        agreePercent.textContent = `${agreeValue}%`;
+        disagreePercent.textContent = `${disagreeValue}%`;
+        agreeFill.style.width = `${agreeValue}%`;
+        disagreeFill.style.width = `${disagreeValue}%`;
+      }
+
+      function addComment() {
+        const author = commentAuthor.value.trim() || "Community Member";
+        const text = commentText.value.trim();
+        if (!text) return;
+        discussionFeed.unshift({
+          author,
+          text,
+          likes: 0,
+          time: "Just now",
+        });
+        commentText.value = "";
+        commentAuthor.value = "";
+        renderDiscussion();
+        observeReveal();
+      }
+
+      function handleDiscussionClick(event) {
+        const button = event.target.closest("button");
+        if (!button) return;
+        const action = button.dataset.action;
+        const index = Number(button.dataset.index);
+        if (action === "like") {
+          discussionFeed[index].likes += 1;
+          renderDiscussion();
+          observeReveal();
+        }
+        if (action === "delete") {
+          discussionFeed.splice(index, 1);
+          renderDiscussion();
+          observeReveal();
+        }
+      }
+
+      function animateCounters() {
+        const counters = document.querySelectorAll("[data-value]");
+        counters.forEach((card) => {
+          const target = +card.dataset.value;
+          let count = 0;
+          const step = Math.ceil(target / 84);
+          const interval = setInterval(() => {
+            count += step;
+            card.textContent = count >= target ? target : count;
+            if (count >= target) clearInterval(interval);
+          }, 18);
+        });
+      }
+
+      function toggleMobileMenu(open) {
+        document.getElementById("mobileMenu").classList.toggle("open", open);
+      }
+
+      function toggleTheme() {
+        document.body.classList.toggle("light-theme");
+        const icon = document.getElementById("themeToggle");
+        const isLight = document.body.classList.contains("light-theme");
+        icon.textContent = isLight ? "🌙" : "☀️";
+      }
+
+      function observeReveal() {
+        const reveals = document.querySelectorAll(".reveal");
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.15 },
+        );
+        reveals.forEach((el) => observer.observe(el));
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        renderMotions();
+        renderEvents();
+        renderLeaders();
+        renderStats();
+        renderDiscussion();
+        updatePollUI();
+        observeReveal();
+        animateCounters();
+
+        setTimeout(() => {
+          document.getElementById("loadingScreen").classList.add("hidden");
+        }, 850);
+
+        document
+          .getElementById("mobileToggle")
+          .addEventListener("click", () => toggleMobileMenu(true));
+        document
+          .getElementById("closeMenu")
+          .addEventListener("click", () => toggleMobileMenu(false));
+        document
+          .getElementById("mobileMenu")
+          .querySelectorAll("a")
+          .forEach((link) => {
+            link.addEventListener("click", () => toggleMobileMenu(false));
+          });
+
+        document
+          .getElementById("themeToggle")
+          .addEventListener("click", toggleTheme);
+        postCommentBtn.addEventListener("click", addComment);
+        discussionList.addEventListener("click", handleDiscussionClick);
+        document.getElementById("agreeBtn").addEventListener("click", () => {
+          agreeVotes += 1;
+          updatePollUI();
+        });
+        document.getElementById("disagreeBtn").addEventListener("click", () => {
+          disagreeVotes += 1;
+          updatePollUI();
+        });
+      });
+
+      // Smooth scroll for internal links
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", function (e) {
+          const target = document.querySelector(this.getAttribute("href"));
+          if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
